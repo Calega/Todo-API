@@ -35,15 +35,16 @@ app.get('/todos/:id', function(req,res){
 
 //Post can take data (Using /todos as other method)
 app.post('/todos', function(req, res) {
-	var body = req.body; //getting item from body parser
+	var body = _.pick(req.body, 'description', 'completed'); //pick to select only fields you want pick (params, valueToKeep);
 	
-	//If body.completed IS NOT A BOOLEAN OR Body.description IS NOT A STRING OR
+	//If body.completed IS NOT A BOOLEAN OR Body.description IS NOT A STRING OR if body.description is not a bunch of blank spaces :)
  	// Checking using underscore methods to see if the value provided can be accepted
  	if(!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
  		return res.status(400).send();
  	}
 
 	body.id = todoNextId++;
+	body.description = body.description.trim();
 	todos.push(body);
 	
 	res.json(body);
