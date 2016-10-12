@@ -1,5 +1,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+var _ = require('underscore');
 
 var app = express();
 var PORT = process.env.PORT || 3000;
@@ -19,16 +20,11 @@ app.get('/', function(req,res){
 app.get('/todos', function(req,res){
 	res.json(todos); //return todos converted to json
 });
+
 //get individual todo by id GET /todos/:id
 app.get('/todos/:id', function(req,res){
 	var todoId = parseInt(req.params.id, 10);
-	var matchedTodo;
-
-	todos.forEach(function (todo){
-		if(todo.id === todoId){
-			matchedTodo = todo;
-		} 
-	});
+	var matchedTodo = _.findWhere(todos, {id: todoId});
 
 	if(matchedTodo){
 		res.json(matchedTodo);
@@ -40,6 +36,13 @@ app.get('/todos/:id', function(req,res){
 //Post can take data (Using /todos as other method)
 app.post('/todos', function(req, res) {
 	var body = req.body; //getting item from body parser
+	
+	//If body.completed IS NOT A BOOLEAN OR Body.description IS NOT A STRING OR
+ 	// Checking using underscore methods to see if the value provided can be accepted
+ 	if(!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
+ 		return res.status(400).send();
+ 	}
+
 	body.id = todoNextId++;
 	todos.push(body);
 	
