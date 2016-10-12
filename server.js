@@ -16,12 +16,21 @@ app.get('/', function(req,res){
 	res.send('TODO Api Root');
 });
 
-//get all todo items get /todos
+//GET /todos?complete=true
 app.get('/todos', function(req,res){
-	res.json(todos); //return todos converted to json
+	var queryParams = req.query; //Query is an object to specify URL parameters
+	var filteredTodos = todos;
+
+	if(queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
+		filteredTodos = _.where(filteredTodos, {completed: true});
+	} else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
+		filteredTodos = _.where(filteredTodos, {completed : false});
+	}
+
+	res.json(filteredTodos); //return todos converted to json
 });
 
-//get individual todo by id GET /todos/:id
+//GET /todos/:id
 app.get('/todos/:id', function(req,res){
 	var todoId = parseInt(req.params.id, 10);
 	var matchedTodo = _.findWhere(todos, {id: todoId});
@@ -33,7 +42,7 @@ app.get('/todos/:id', function(req,res){
 	}
 });
 
-//Post can take data (Using /todos as other method)
+//POST /todos
 app.post('/todos', function(req, res) {
 	var body = _.pick(req.body, 'description', 'completed'); //pick to select only fields you want pick (params, valueToKeep);
 	
@@ -50,6 +59,7 @@ app.post('/todos', function(req, res) {
 	res.json(body);
 });
 
+//DELETE /todos/:id
 app.delete('/todos/:id', function(req,res){
 	var todoId = parseInt(req.params.id, 10);
 	var matchedTodo = _.findWhere(todos, {id: todoId});
@@ -62,6 +72,7 @@ app.delete('/todos/:id', function(req,res){
 	}
 });
 
+//PUT /todos/:id
 app.put('/todos/:id', function(req, res) {
 	var todoId = parseInt(req.params.id, 10);
 	var matchedTodo = _.findWhere(todos, {id: todoId});
