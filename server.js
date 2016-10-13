@@ -140,13 +140,22 @@ app.post('/users/login', function(req, res) {
 
 	//creating authenticate class method to do stuff for authentication (created in the model)
 	db.user.authenticate(body).then(function(user) {
-		res.json(user.toPublicJSON());
+		var token = user.generateToken('authentication');
+
+		if (token) {
+			res.header('Auth').json(user.toPublicJSON());
+		} else {
+			res.status(401).send();
+		}
+
 	}, function(e) {
 		res.status(401).send();
 	});
 });
 
-db.sequelize.sync({force:true}).then(function() {
+db.sequelize.sync({
+	force: true
+}).then(function() {
 	app.listen(PORT, function() {
 		console.log('Express listening on PORT ' + PORT + '!');
 	});
