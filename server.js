@@ -66,7 +66,18 @@ app.post('/todos', function(req, res) {
 		res.json(todo.toJSON());
 	}, function(e) {
 		res.status(400).json(e);
-	})
+	});
+});
+
+//POST /todos
+app.post('/users', function(req, res) {
+	var body = _.pick(req.body, 'email', 'password'); 
+
+	db.user.create(body).then(function(user) {
+		res.json(user.toJSON());
+	}, function(e) {
+		res.status(400).json(e);
+	});
 });
 
 //DELETE /todos/:id
@@ -106,16 +117,18 @@ app.put('/todos/:id', function(req, res) {
 
 	db.todo.findById(todoId).then(function(todo) {
 		if (todo) {
-			return todo.update(attributes);
+			todo.update(attributes).then(function(todo) {
+				res.json(todo);
+			}, function(e) {
+				res.send(400).json({
+					error: e
+				});
+			});
 		} else {
 			res.status(404).send();
 		}
 	}, function() {
 		res.status(500).send();
-	}).then(function (todo) {
-		res.json(todo);
-	}, function (e) {
-		res.send(400).json({error : e});
 	});
 });
 
